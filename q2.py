@@ -38,7 +38,8 @@ Y_test = np.ravel(Ydata.iloc[-test_n:])
 # question e
 ###
 
-import jax.numpy as jnp
+import jax
+from jax import numpy as jnp
 from jax import grad
 
 step = 1.0
@@ -54,12 +55,14 @@ x = X_loss_trainer
 y = Y_train
 rang = len(x)
 
-def loss(w):
+def loss(w,x,y):
   sum_list = jnp.array([[]])
-  for i in range(rang):
-    xi = jnp.array([x[i]]).T
-    yi = y[i]
-    sum_list = jnp.append(sum_list, function(xi,yi,w)[0]*(1/rang))
+  rang = 204
+  #for i in range(rang):
+  #  xi = jnp.array([x[i]]).T
+  #  yi = y[i]
+  #  sum_list = 
+  sum_list = (((1/4)*(y-jnp.matmul(w.T,x.T))**2+1)**(1/2)-1)*(1/rang)
   return jnp.sum(sum_list)
 
 def test_loss(w):
@@ -72,25 +75,31 @@ def test_loss(w):
     sum_list = jnp.append(sum_list, function(xi,yi,w)[0]*(1/rang))
   return jnp.sum(sum_list)
 
+def iteration(step,w):
+  return (w - step * grad(loss)(w,x,y))
+
 w0 = jnp.array([1.0,1.0,1.0,1.0]).T
 w = w0
 
-loss_k = loss(w)
+from scipy.optimize import minimize
+
+loss_k = loss(w,x,y)
 loss_delta = loss_k
 count = 0
-training_loss = np.array([loss_k])
+print(loss_k)
 while loss_delta >= 0.0001:
-  w = w - step * grad(loss)(w)
-  new_loss = loss(w)
+  w = iteration(step,w)
+  new_loss = loss(w,x,y)
   loss_delta = abs(new_loss - loss_k)
-  training_loss = np.append(training_loss,new_loss)
-  print(loss_delta)
+  print(new_loss)
   loss_k = new_loss
+
+  #optimal = minimize(iteration,step,args=(w),method="BFGS")
+  #step = optimal.x
   count += 1
 
 print(count)
-print(training_loss)
 print(w)
-print(loss(w))
+print(loss(w,x,y))
 print(test_loss(w))
 
