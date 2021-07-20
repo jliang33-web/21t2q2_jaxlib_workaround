@@ -57,22 +57,15 @@ rang = len(x)
 
 def loss(w,x,y):
   sum_list = jnp.array([[]])
-  rang = 204
-  #for i in range(rang):
-  #  xi = jnp.array([x[i]]).T
-  #  yi = y[i]
-  #  sum_list = 
-  sum_list = (((1/4)*(y-jnp.matmul(w.T,x.T))**2+1)**(1/2)-1)*(1/rang)
+  length = len(x)
+  sum_list = (((1/4)*(y-jnp.matmul(w.T,x.T))**2+1)**(1/2)-1)*(1/length)
   return jnp.sum(sum_list)
 
 def test_loss(w):
   x = np.hstack((X_col1,X_test))
   y = Y_test
-  sum_list = jnp.array([[]])
-  for i in range(rang):
-    xi = jnp.array([x[i]]).T
-    yi = y[i]
-    sum_list = jnp.append(sum_list, function(xi,yi,w)[0]*(1/rang))
+  length = len(x)
+  sum_list = (((1/4)*(y-jnp.matmul(w.T,x.T))**2+1)**(1/2)-1)*(1/length)
   return jnp.sum(sum_list)
 
 def iteration(step,w):
@@ -80,8 +73,6 @@ def iteration(step,w):
 
 w0 = jnp.array([1.0,1.0,1.0,1.0]).T
 w = w0
-
-from scipy.optimize import minimize
 
 loss_k = loss(w,x,y)
 loss_delta = loss_k
@@ -93,13 +84,9 @@ while loss_delta >= 0.0001:
   loss_delta = abs(new_loss - loss_k)
   print(new_loss)
   loss_k = new_loss
-
-  #optimal = minimize(iteration,step,args=(w),method="BFGS")
-  #step = optimal.x
   count += 1
 
-print(count)
-print(w)
-print(loss(w,x,y))
-print(test_loss(w))
-
+print("Iterations: ",count)
+print("Final w:    ",w)
+print("Training loss: ", loss(w,x,y))
+print("Testing loss:  ", test_loss(w))
